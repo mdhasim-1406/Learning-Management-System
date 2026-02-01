@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getUsers, createUser, updateUser, deleteUser } from '../api';
 import AppLayout from '../components/layout/AppLayout';
-import PageHeader from '../components/layout/PageHeader';
+import { PageHeader } from '../components/layout/PageHeader';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Badge from '../components/ui/Badge';

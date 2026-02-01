@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getUsers, getEnrollments, getCourses } from '../api';
 import AppLayout from '../components/layout/AppLayout';
-import PageHeader from '../components/layout/PageHeader';
+import { PageHeader } from '../components/layout/PageHeader';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import Avatar from '../components/ui/Avatar';
