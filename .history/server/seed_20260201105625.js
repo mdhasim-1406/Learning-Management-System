@@ -56,24 +56,6 @@ const seedDatabase = async () => {
     const createdArticles = await Article.create(articlesWithAuthor);
     console.log(`Created ${createdArticles.length} articles`);
 
-    // Create quizzes for each course
-    const quizzesToCreate = [];
-    for (const course of createdCourses) {
-      const quizData = quizzesData[course.title];
-      if (quizData) {
-        quizzesToCreate.push({
-          course: course._id,
-          title: quizData.title,
-          questions: quizData.questions,
-          passingScore: quizData.passingScore,
-          createdBy: course.createdBy,
-        });
-      }
-    }
-    
-    const createdQuizzes = await Quiz.create(quizzesToCreate);
-    console.log(`Created ${createdQuizzes.length} quizzes`);
-
     console.log('\n✓ Seed data created successfully!\n');
     console.log('Login credentials (all use password: password123):');
     console.log('─'.repeat(50));

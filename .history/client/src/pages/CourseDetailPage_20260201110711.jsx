@@ -114,7 +114,7 @@ const CourseDetailPage = () => {
   };
 
   const calculateProgress = () => {
-    if (!enrollment || !course || !course.modules) return 0;
+    if (!enrollment || !course) return 0;
     const totalLessons = course.modules.reduce((acc, m) => acc + (m.lessons?.length || 0), 0);
     if (totalLessons === 0) return 0;
     const progressArray = Array.isArray(enrollment.progress) ? enrollment.progress : [];

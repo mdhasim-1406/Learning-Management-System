@@ -114,7 +114,7 @@ const CourseDetailPage = () => {
   };
 
   const calculateProgress = () => {
-    if (!enrollment || !course || !course.modules) return 0;
+    if (!enrollment || !course) return 0;
     const totalLessons = course.modules.reduce((acc, m) => acc + (m.lessons?.length || 0), 0);
     if (totalLessons === 0) return 0;
     const progressArray = Array.isArray(enrollment.progress) ? enrollment.progress : [];
@@ -280,10 +280,9 @@ const CourseDetailPage = () => {
               <div className="space-y-4">
                 {course.modules.map((module, moduleIndex) => {
                   const moduleLessons = module.lessons || [];
-                  const progressArray = Array.isArray(enrollment?.progress) ? enrollment.progress : [];
-                  const completedInModule = progressArray.filter(
+                  const completedInModule = enrollment?.progress?.filter(
                     (p) => moduleLessons.some((l) => l._id === p.lessonId) && p.completed
-                  ).length;
+                  ).length || 0;
                   
                   return (
                     <div key={module._id || moduleIndex} className="border rounded-lg overflow-hidden">
@@ -319,7 +318,7 @@ const CourseDetailPage = () => {
                       {expandedModules[moduleIndex] && (
                         <div className="divide-y">
                           {moduleLessons.map((lesson, lessonIndex) => {
-                            const isCompleted = progressArray.some(
+                            const isCompleted = enrollment?.progress?.some(
                               (p) => p.lessonId === lesson._id && p.completed
                             );
                             const canAccess = enrollment;

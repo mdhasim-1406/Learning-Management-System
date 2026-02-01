@@ -118,8 +118,7 @@ const LessonViewerPage = () => {
   }, [id, navigate]);
 
   const isLessonCompleted = (lessonId) => {
-    const progressArray = Array.isArray(enrollment?.progress) ? enrollment.progress : [];
-    return progressArray.some((p) => p.lessonId === lessonId && p.completed);
+    return enrollment?.progress?.some((p) => p.lessonId === lessonId && p.completed);
   };
 
   const handleMarkComplete = async () => {
@@ -164,8 +163,7 @@ const LessonViewerPage = () => {
     if (!enrollment || !course?.modules) return 0;
     const totalLessons = course.modules.reduce((acc, m) => acc + (m.lessons?.length || 0), 0);
     if (totalLessons === 0) return 0;
-    const progressArray = Array.isArray(enrollment.progress) ? enrollment.progress : [];
-    const completedLessons = progressArray.filter((p) => p.completed).length;
+    const completedLessons = enrollment.progress?.filter((p) => p.completed).length || 0;
     return Math.round((completedLessons / totalLessons) * 100);
   };
 
@@ -174,8 +172,7 @@ const LessonViewerPage = () => {
   };
 
   const getCompletedLessons = () => {
-    const progressArray = Array.isArray(enrollment?.progress) ? enrollment.progress : [];
-    return progressArray.filter((p) => p.completed).length;
+    return enrollment?.progress?.filter((p) => p.completed).length || 0;
   };
 
   const getLessonIcon = (type) => {
@@ -191,14 +188,14 @@ const LessonViewerPage = () => {
     }
   };
 
-  const renderContent = (lesson) => {
-    if (!lesson) return null;
+  const renderContent = () => {
+    if (!currentLesson) return null;
 
-    switch (lesson.type) {
+    switch (currentLesson.type) {
       case 'video':
-        const videoId = lesson.content?.includes('youtube')
-          ? lesson.content.split('v=')[1]?.split('&')[0] ||
-            lesson.content.split('/').pop()
+        const videoId = currentLesson.content.includes('youtube')
+          ? currentLesson.content.split('v=')[1]?.split('&')[0] ||
+            currentLesson.content.split('/').pop()
           : null;
         
         if (videoId) {
@@ -215,14 +212,14 @@ const LessonViewerPage = () => {
         }
         return (
           <div className="aspect-video rounded-xl overflow-hidden bg-black">
-            <video className="w-full h-full" controls src={lesson.content} />
+            <video className="w-full h-full" controls src={currentLesson.content} />
           </div>
         );
 
       case 'pdf':
         return (
           <div className="rounded-xl overflow-hidden border">
-            <iframe className="w-full h-[600px]" src={lesson.content} />
+            <iframe className="w-full h-[600px]" src={currentLesson.content} />
           </div>
         );
 
@@ -234,7 +231,7 @@ const LessonViewerPage = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-2">External Resource</h3>
               <p className="text-gray-500 mb-6">This lesson contains an external resource</p>
               <a
-                href={lesson.content}
+                href={currentLesson.content}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -400,7 +397,7 @@ const LessonViewerPage = () => {
                     </span>
                   </div>
                   <div className="ml-3 border-l-2 border-gray-100 pl-4 space-y-1">
-                    {(module.lessons || []).map((lesson, lIdx) => {
+                    {module.lessons.map((lesson, lIdx) => {
                       const isActive = mIdx === currentModuleIndex && lIdx === currentLessonIndex;
                       const completed = isLessonCompleted(lesson._id);
                       const LIcon = getLessonIcon(lesson.type);
@@ -478,7 +475,7 @@ const LessonViewerPage = () => {
         {/* Content area */}
         <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
           <div className="max-w-4xl mx-auto">
-            {renderContent(currentLesson)}
+            {renderContent()}
           </div>
         </div>
 

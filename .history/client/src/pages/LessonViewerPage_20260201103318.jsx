@@ -118,8 +118,7 @@ const LessonViewerPage = () => {
   }, [id, navigate]);
 
   const isLessonCompleted = (lessonId) => {
-    const progressArray = Array.isArray(enrollment?.progress) ? enrollment.progress : [];
-    return progressArray.some((p) => p.lessonId === lessonId && p.completed);
+    return enrollment?.progress?.some((p) => p.lessonId === lessonId && p.completed);
   };
 
   const handleMarkComplete = async () => {
@@ -164,8 +163,7 @@ const LessonViewerPage = () => {
     if (!enrollment || !course?.modules) return 0;
     const totalLessons = course.modules.reduce((acc, m) => acc + (m.lessons?.length || 0), 0);
     if (totalLessons === 0) return 0;
-    const progressArray = Array.isArray(enrollment.progress) ? enrollment.progress : [];
-    const completedLessons = progressArray.filter((p) => p.completed).length;
+    const completedLessons = enrollment.progress?.filter((p) => p.completed).length || 0;
     return Math.round((completedLessons / totalLessons) * 100);
   };
 
@@ -174,8 +172,7 @@ const LessonViewerPage = () => {
   };
 
   const getCompletedLessons = () => {
-    const progressArray = Array.isArray(enrollment?.progress) ? enrollment.progress : [];
-    return progressArray.filter((p) => p.completed).length;
+    return enrollment?.progress?.filter((p) => p.completed).length || 0;
   };
 
   const getLessonIcon = (type) => {
@@ -478,7 +475,7 @@ const LessonViewerPage = () => {
         {/* Content area */}
         <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
           <div className="max-w-4xl mx-auto">
-            {renderContent(currentLesson)}
+            {renderContent()}
           </div>
         </div>
 
