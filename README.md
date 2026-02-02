@@ -1,22 +1,26 @@
 # Learning Management System (LMS)
 
-A full-stack Learning Management System built with React, Express, and MongoDB.
+A full-stack Learning Management System built with React, Express, and MongoDB. A complete learning platform with role-based access, course management, progress tracking, and comprehensive quiz system.
 
-## Features
+## ✨ Features
 
 - **User Management**: Role-based access control (Superadmin, Admin, Trainer, Learner)
-- **Course Management**: Create courses with modules and lessons
-- **Enrollment System**: Self-enrollment or admin-assigned
-- **Progress Tracking**: Track lesson completion and overall progress
-- **Quiz System**: Course quizzes with auto-evaluation
-- **Dashboard**: Role-based statistics and insights
-- **Reports**: Admin reports with CSV export
+- **Course Management**: Create courses with modules and lessons (video & link content)
+- **Enrollment System**: Self-enrollment with instant progress initialization
+- **Progress Tracking**: Track lesson completion, module progress, and overall course progress
+- **Quiz System**: 6 course-specific quizzes with 10 questions each, auto-evaluation, passing scores
+- **Knowledge Base**: Searchable articles for self-service learning
+- **Certificates**: Auto-generated certificates upon course completion
+- **Dashboard**: Role-based statistics and analytics
+- **Reports**: Admin reports with CSV export, user activity tracking
 
-## Tech Stack
+## 🛠 Tech Stack
 
-- **Frontend**: React 18, Vite, Tailwind CSS, React Router
-- **Backend**: Express.js, MongoDB, Mongoose, JWT
-- **Authentication**: JWT-based with role middleware
+- **Frontend**: React 18, Vite 5.4, Tailwind CSS (@tailwindcss/vite), React Router v6, Axios
+- **Backend**: Express.js, MongoDB, Mongoose, JWT Authentication
+- **UI Components**: Custom components (Button, Input, Card, Badge, Modal, ProgressRing)
+- **Styling**: Tailwind CSS with responsive design
+- **Database**: MongoDB with Mongoose ODM
 
 ## Project Structure
 
@@ -80,11 +84,30 @@ cd server
 npm run seed
 ```
 
-This creates the following demo accounts:
-- `superadmin@lms.com` / `password123`
-- `admin@lms.com` / `password123`
-- `trainer@lms.com` / `password123`
-- `learner@lms.com` / `password123`
+This creates:
+- **15 demo users** across all roles
+- **6 published courses** with complete structure
+- **10 knowledge base articles**
+- **6 course-specific quizzes** (60 questions total)
+
+#### Demo Login Credentials
+
+All accounts use password: `password123`
+
+**Superadmin:**
+- superadmin@company.com
+
+**Admin:**
+- admin@company.com
+- hr@company.com
+
+**Trainer:**
+- john.trainer@company.com
+- emily.dev@company.com
+- david.cloud@company.com
+
+**Learner:**
+- alex.learner@company.com (and 8 others)
 
 ### 4. Run the Application
 
@@ -153,6 +176,46 @@ npm run dev
 2. **User Management**: Admin creates/manages users
 3. **Course CRUD**: Trainer creates course with modules/lessons
 4. **Enrollment**: Learner enrolls in published course
-5. **Learning**: Complete lessons, track progress
-6. **Quiz**: Take quiz after completing lessons
-7. **Dashboard**: View role-specific statistics
+5. **Learning**: Watch videos, access resources, mark lessons complete
+6. **Quiz**: Take course-specific quiz after learning
+7. **Certificate**: View earned certificate upon completion
+8. **Dashboard**: View role-specific statistics and analytics
+9. **Knowledge Base**: Search and read learning articles
+10. **Reports**: Admin views user activity and completion reports
+
+## Recent Updates (Day 2 - Feb 1, 2026)
+
+### Quiz System Implementation
+- Added 6 comprehensive course-specific quizzes with 10 questions each
+- Each quiz mapped to its course: React, Node.js, MongoDB, UI/UX, DevOps, TypeScript
+- Questions cover core concepts from each course
+- Passing score threshold of 70%
+
+### Bug Fixes & Improvements
+- Fixed `enrollment.progress` filtering errors in LessonViewerPage and CourseDetailPage
+- Added `Array.isArray()` safety checks throughout for enrollment progress data
+- Fixed NaN errors in ProgressRing component with null/undefined checks
+- Improved error handling with graceful fallbacks
+
+### UI/UX Enhancements
+- Enhanced CourseDetailPage with module expansion and lesson tracking
+- Improved LessonViewerPage with navigation and completion marking
+- Fixed import statements for proper component rendering
+- Added missing component variants (Button outline, Badge variants)
+
+## Known Issues & Limitations
+
+- Quiz attempts are limited by passing score mechanism
+- Certificate auto-generation on completion
+- Learner cannot create courses (trainer+ only)
+- No course scheduling/deadline features
+
+## Future Enhancements
+
+- Video upload instead of YouTube embedding
+- Peer review and feedback system
+- Discussion forums
+- Certificate sharing to LinkedIn
+- Mobile app
+- Real-time notifications
+- Advanced analytics with skill tracking
