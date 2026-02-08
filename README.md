@@ -1,18 +1,21 @@
 # LearnHub - Learning Management System
 
-A full-stack Learning Management System with a professional, modern UI built with React, Material-UI, Express, and MongoDB.
+A full-stack Learning Management System with a professional, modern "Warm Sunset" UI built with React, Material-UI, Express, and MongoDB.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Node](https://img.shields.io/badge/node-18%2B-green.svg)
 ![React](https://img.shields.io/badge/react-18.2-blue.svg)
-![MUI](https://img.shields.io/badge/MUI-7.3-purple.svg)
+![MUI](https://img.shields.io/badge/MUI-7.3-orange.svg)
 
 ## ✨ Features
 
 - **User Management**: Role-based access control (Superadmin, Admin, Trainer, Learner)
 - **Course Management**: Create courses with modules and lessons (video, PDF & link content)
+- **YouTube Integration**: Seamlessly embed YouTube videos for lessons
+- **Smart Progress Tracking**: 
+  - Watch videos completely to mark as done
+  - Track module progress and overall course completion
 - **Enrollment System**: Self-enrollment with instant progress initialization
-- **Progress Tracking**: Track lesson completion, module progress, and overall course progress
 - **Quiz System**: 6 course-specific quizzes with 10 questions each, auto-evaluation
 - **Knowledge Base**: Searchable articles for self-service learning
 - **Certificates**: Auto-generated certificates upon course completion
@@ -43,24 +46,23 @@ A full-stack Learning Management System with a professional, modern UI built wit
 | [JWT](https://jwt.io/) | 9.0 | Authentication |
 | [bcryptjs](https://github.com/dcodeIO/bcrypt.js) | 2.4 | Password Hashing |
 
-## 🎨 Design System
+## 🎨 Design System: "Warm Sunset"
 
 ### Color Palette
-| Role | Color | Hex Code |
-|------|-------|----------|
-| Primary | Deep Navy Blue | `#1E3A5F` |
-| Primary Dark | Darker Navy | `#0F2744` |
-| Secondary | Warm Orange | `#FF6B35` |
-| Success | Fresh Green | `#10B981` |
-| Warning | Amber | `#F59E0B` |
-| Background | Slate | `#F8FAFC` |
+| Role | Color | Hex Code | Description |
+|------|-------|----------|-------------|
+| Primary | Burnt Orange | `#D84315` | Deep, energetic primary action color |
+| Secondary | Warm Amber | `#FF8F00` | Golden accents and highlights |
+| Accents | Golden Yellow | `#FFB300` | Bright highlights and gradients |
+| Success | Fresh Green | `#43A047` | Completion and success states |
+| Background | Warm White | `#FBF8F5` | Soft, paper-like background |
 
 ### UI Features
-- **Dark Sidebar**: Gradient navigation with staggered animations
+- **Sunset Gradient Sidebar**: Rich gradient from burnt orange to dark brown
 - **Glass Effect Header**: Blur backdrop with smooth transitions
-- **Animated Cards**: Hover lift effects with shadows
-- **Gradient Buttons**: Primary action buttons with hover transforms
-- **Wave Skeletons**: Loading states with subtle animations
+- **Animated Cards**: Hover lift effects with warm shadows
+- **Gradient Buttons**: Primary action buttons with orange-to-amber gradients
+- **Smooth Pill Buttons**: Rounded, pill-shaped buttons for "Mark Complete"
 
 ## 📁 Project Structure
 
@@ -86,6 +88,9 @@ Learning-Management-System/
 │   ├── config/                 # Database config
 │   ├── server.js               # Entry point
 │   └── seed.js                 # Demo data seeder
+├── scripts/                    # Setup scripts
+│   ├── setup.sh                # Linux/macOS setup
+│   └── setup.bat               # Windows setup
 └── .env                        # Environment variables
 ```
 
@@ -95,40 +100,44 @@ Learning-Management-System/
 - Node.js 18+
 - MongoDB (local or Atlas)
 
-### 1. Clone & Install
+### 1. Automated Setup (Recommended)
 
+**Linux / macOS:**
 ```bash
-# Clone repository
-git clone <repo-url>
-cd Learning-Management-System
-
-# Install backend
-cd server && npm install
-
-# Install frontend
-cd ../client && npm install
+./scripts/setup.sh
 ```
 
-### 2. Configure Environment
-
-Create `.env` in root directory:
-
-```env
-MONGO_URI=mongodb://localhost:27017/lms
-JWT_SECRET=your-super-secret-key-change-in-production
-PORT=5000
+**Windows:**
+Double-click `scripts/setup.bat` or run:
+```cmd
+scripts\setup.bat
 ```
 
-### 3. Seed Database
+### 2. Manual Setup
 
-```bash
-cd server
-npm run seed
-```
+If you prefer manual installation:
 
-Creates: 15 users, 6 courses, 10 articles, 6 quizzes (60 questions)
+1.  **Install Backend:**
+    ```bash
+    cd server && npm install
+    ```
+2.  **Install Frontend:**
+    ```bash
+    cd ../client && npm install
+    ```
+3.  **Configure Env:**
+    Create `.env` in root:
+    ```env
+    MONGO_URI=mongodb://localhost:27017/lms
+    JWT_SECRET=your-super-secret-key-change-in-production
+    PORT=5000
+    ```
+4.  **Seed Database:**
+    ```bash
+    cd server && npm run seed
+    ```
 
-### 4. Run Application
+### 3. Run Application
 
 ```bash
 # Terminal 1 - Backend
@@ -168,16 +177,6 @@ All accounts use password: `password123`
 | GET | /api/quizzes/courses/:id/quiz | Auth | Get quiz |
 | POST | /api/quizzes/:id/attempt | Auth | Submit quiz |
 | GET | /api/dashboard/stats | Auth | Dashboard stats |
-
-## 🧪 Testing Flows
-
-1. **Login** with demo credentials
-2. **Dashboard** - View role-specific stats
-3. **Catalog** - Browse available courses
-4. **Enroll** - Self-enroll in a course
-5. **Learn** - Watch lessons, mark complete
-6. **Quiz** - Take assessment after completion
-7. **Certificate** - View earned certificate
 
 ## 📄 License
 
