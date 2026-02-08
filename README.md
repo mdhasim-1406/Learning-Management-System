@@ -1,63 +1,117 @@
-# Learning Management System (LMS)
+# LearnHub - Learning Management System
 
-A full-stack Learning Management System built with React, Express, and MongoDB. A complete learning platform with role-based access, course management, progress tracking, and comprehensive quiz system.
+A full-stack Learning Management System with a professional, modern UI built with React, Material-UI, Express, and MongoDB.
+
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Node](https://img.shields.io/badge/node-18%2B-green.svg)
+![React](https://img.shields.io/badge/react-18.2-blue.svg)
+![MUI](https://img.shields.io/badge/MUI-7.3-purple.svg)
 
 ## ✨ Features
 
 - **User Management**: Role-based access control (Superadmin, Admin, Trainer, Learner)
-- **Course Management**: Create courses with modules and lessons (video & link content)
+- **Course Management**: Create courses with modules and lessons (video, PDF & link content)
 - **Enrollment System**: Self-enrollment with instant progress initialization
 - **Progress Tracking**: Track lesson completion, module progress, and overall course progress
-- **Quiz System**: 6 course-specific quizzes with 10 questions each, auto-evaluation, passing scores
+- **Quiz System**: 6 course-specific quizzes with 10 questions each, auto-evaluation
 - **Knowledge Base**: Searchable articles for self-service learning
 - **Certificates**: Auto-generated certificates upon course completion
 - **Dashboard**: Role-based statistics and analytics
-- **Reports**: Admin reports with CSV export, user activity tracking
+- **Reports**: Admin reports with CSV export
 
 ## 🛠 Tech Stack
 
-- **Frontend**: React 18, Vite 5.4, Tailwind CSS (@tailwindcss/vite), React Router v6, Axios
-- **Backend**: Express.js, MongoDB, Mongoose, JWT Authentication
-- **UI Components**: Custom components (Button, Input, Card, Badge, Modal, ProgressRing)
-- **Styling**: Tailwind CSS with responsive design
-- **Database**: MongoDB with Mongoose ODM
+### Frontend
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| [React](https://react.dev/) | 18.2 | UI Library |
+| [Vite](https://vitejs.dev/) | 5.0 | Build Tool |
+| [Material-UI (MUI)](https://mui.com/) | 7.3 | Component Library |
+| [Emotion](https://emotion.sh/) | 11.14 | CSS-in-JS Styling |
+| [Tailwind CSS](https://tailwindcss.com/) | 4.0 | Utility CSS |
+| [Framer Motion](https://www.framer.com/motion/) | 12.33 | Animations |
+| [React Router](https://reactrouter.com/) | 6.21 | Routing |
+| [Axios](https://axios-http.com/) | 1.6 | HTTP Client |
+| [Three.js](https://threejs.org/) | 0.182 | 3D Effects |
 
-## Project Structure
+### Backend
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| [Express.js](https://expressjs.com/) | 4.18 | Web Framework |
+| [MongoDB](https://www.mongodb.com/) | - | Database |
+| [Mongoose](https://mongoosejs.com/) | 8.0 | MongoDB ODM |
+| [JWT](https://jwt.io/) | 9.0 | Authentication |
+| [bcryptjs](https://github.com/dcodeIO/bcrypt.js) | 2.4 | Password Hashing |
+
+## 🎨 Design System
+
+### Color Palette
+| Role | Color | Hex Code |
+|------|-------|----------|
+| Primary | Deep Navy Blue | `#1E3A5F` |
+| Primary Dark | Darker Navy | `#0F2744` |
+| Secondary | Warm Orange | `#FF6B35` |
+| Success | Fresh Green | `#10B981` |
+| Warning | Amber | `#F59E0B` |
+| Background | Slate | `#F8FAFC` |
+
+### UI Features
+- **Dark Sidebar**: Gradient navigation with staggered animations
+- **Glass Effect Header**: Blur backdrop with smooth transitions
+- **Animated Cards**: Hover lift effects with shadows
+- **Gradient Buttons**: Primary action buttons with hover transforms
+- **Wave Skeletons**: Loading states with subtle animations
+
+## 📁 Project Structure
 
 ```
 Learning-Management-System/
-├── client/                 # React + Vite frontend
+├── client/                     # React + Vite frontend
 │   ├── src/
-│   │   ├── api/            # Axios instance + API calls
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Route-level components
-│   │   ├── context/        # AuthContext
-│   │   ├── App.jsx
-│   │   └── main.jsx
+│   │   ├── api/                # Axios API calls
+│   │   ├── components/
+│   │   │   ├── ui-mui/         # MUI wrapper components
+│   │   │   ├── ui-next/        # Component re-exports
+│   │   │   └── layout/         # App layout components
+│   │   ├── pages/              # Route pages
+│   │   ├── context/            # React Context (Auth)
+│   │   ├── theme/              # MUI theme configuration
+│   │   └── lib/                # Utilities & animations
 │   └── package.json
 ├── server/
-│   ├── models/             # Mongoose schemas
-│   ├── routes/             # Express routers
-│   ├── middleware/         # auth.js, roleCheck.js
-│   ├── utils/              # generateToken.js, asyncHandler.js
-│   ├── config/             # db.js
-│   ├── server.js           # Entry point
-│   ├── seed.js             # Seed data script
-│   └── package.json
-├── .env
-└── README.md
+│   ├── models/                 # Mongoose schemas
+│   ├── routes/                 # Express routes
+│   ├── middleware/             # Auth & role middleware
+│   ├── utils/                  # Helpers
+│   ├── config/                 # Database config
+│   ├── server.js               # Entry point
+│   └── seed.js                 # Demo data seeder
+└── .env                        # Environment variables
 ```
 
-## Prerequisites
+## 🚀 Quick Start
 
+### Prerequisites
 - Node.js 18+
 - MongoDB (local or Atlas)
 
-## Setup
+### 1. Clone & Install
 
-### 1. Environment Variables
+```bash
+# Clone repository
+git clone <repo-url>
+cd Learning-Management-System
 
-The `.env` file is already created in the root:
+# Install backend
+cd server && npm install
+
+# Install frontend
+cd ../client && npm install
+```
+
+### 2. Configure Environment
+
+Create `.env` in root directory:
 
 ```env
 MONGO_URI=mongodb://localhost:27017/lms
@@ -65,66 +119,40 @@ JWT_SECRET=your-super-secret-key-change-in-production
 PORT=5000
 ```
 
-### 2. Install Dependencies
-
-```bash
-# Backend
-cd server
-npm install
-
-# Frontend
-cd ../client
-npm install
-```
-
-### 3. Seed the Database
+### 3. Seed Database
 
 ```bash
 cd server
 npm run seed
 ```
 
-This creates:
-- **15 demo users** across all roles
-- **6 published courses** with complete structure
-- **10 knowledge base articles**
-- **6 course-specific quizzes** (60 questions total)
+Creates: 15 users, 6 courses, 10 articles, 6 quizzes (60 questions)
 
-#### Demo Login Credentials
-
-All accounts use password: `password123`
-
-**Superadmin:**
-- superadmin@company.com
-
-**Admin:**
-- admin@company.com
-- hr@company.com
-
-**Trainer:**
-- john.trainer@company.com
-- emily.dev@company.com
-- david.cloud@company.com
-
-**Learner:**
-- alex.learner@company.com (and 8 others)
-
-### 4. Run the Application
+### 4. Run Application
 
 ```bash
 # Terminal 1 - Backend
-cd server
-npm start
+cd server && npm run dev
 
 # Terminal 2 - Frontend
-cd client
-npm run dev
+cd client && npm run dev
 ```
 
-- Frontend: http://localhost:5173
-- Backend: http://localhost:5000
+- **Frontend**: http://localhost:5173
+- **Backend**: http://localhost:5000
 
-## API Endpoints
+## 🔐 Demo Credentials
+
+All accounts use password: `password123`
+
+| Role | Email |
+|------|-------|
+| Superadmin | superadmin@company.com |
+| Admin | admin@company.com |
+| Trainer | john.trainer@company.com |
+| Learner | alex.learner@company.com |
+
+## 📡 API Endpoints
 
 | Method | Endpoint | Access | Purpose |
 |--------|----------|--------|---------|
@@ -132,90 +160,25 @@ npm run dev
 | GET | /api/auth/me | Auth | Current user |
 | GET | /api/users | Admin | List users |
 | POST | /api/users | Admin | Create user |
-| PUT | /api/users/:id | Admin | Update user |
-| DELETE | /api/users/:id | Admin | Soft delete |
 | GET | /api/courses | Auth | List courses |
-| GET | /api/courses/:id | Auth | Course detail |
 | POST | /api/courses | Trainer+ | Create course |
-| PUT | /api/courses/:id | Owner/Admin | Update course |
-| DELETE | /api/courses/:id | Owner/Admin | Delete course |
 | GET | /api/enrollments | Auth | My enrollments |
 | POST | /api/enrollments | Auth | Enroll |
 | PUT | /api/enrollments/:id/progress | Auth | Mark complete |
-| GET | /api/quizzes/courses/:courseId/quiz | Auth | Get quiz |
-| POST | /api/quizzes/courses/:courseId/quiz | Trainer+ | Create quiz |
+| GET | /api/quizzes/courses/:id/quiz | Auth | Get quiz |
 | POST | /api/quizzes/:id/attempt | Auth | Submit quiz |
-| GET | /api/dashboard/stats | Auth | Role-based stats |
+| GET | /api/dashboard/stats | Auth | Dashboard stats |
 
-## Frontend Routes
+## 🧪 Testing Flows
 
-| Route | Page | Access |
-|-------|------|--------|
-| /login | LoginPage | Public |
-| /dashboard | DashboardPage | All Auth |
-| /courses | CourseCatalogPage | All Auth |
-| /courses/:id | CourseDetailPage | All Auth |
-| /courses/:id/learn | LessonViewerPage | Enrolled |
-| /courses/:id/quiz | QuizPage | Enrolled |
-| /my-enrollments | MyEnrollmentsPage | Learner |
-| /admin/users | AdminUsersPage | Admin+ |
-| /admin/courses | AdminCoursesPage | Trainer+ |
-| /admin/courses/:id/edit | CourseEditorPage | Trainer+ |
-| /admin/reports | AdminReportsPage | Admin |
+1. **Login** with demo credentials
+2. **Dashboard** - View role-specific stats
+3. **Catalog** - Browse available courses
+4. **Enroll** - Self-enroll in a course
+5. **Learn** - Watch lessons, mark complete
+6. **Quiz** - Take assessment after completion
+7. **Certificate** - View earned certificate
 
-## User Roles
+## 📄 License
 
-- **Superadmin**: Full system access
-- **Admin**: User management, all courses access, reports
-- **Trainer**: Create and manage own courses, create quizzes
-- **Learner**: Browse courses, enroll, learn, take quizzes
-
-## Testing Flows
-
-1. **Authentication**: Login with demo credentials
-2. **User Management**: Admin creates/manages users
-3. **Course CRUD**: Trainer creates course with modules/lessons
-4. **Enrollment**: Learner enrolls in published course
-5. **Learning**: Watch videos, access resources, mark lessons complete
-6. **Quiz**: Take course-specific quiz after learning
-7. **Certificate**: View earned certificate upon completion
-8. **Dashboard**: View role-specific statistics and analytics
-9. **Knowledge Base**: Search and read learning articles
-10. **Reports**: Admin views user activity and completion reports
-
-## Recent Updates (Day 2 - Feb 1, 2026)
-
-### Quiz System Implementation
-- Added 6 comprehensive course-specific quizzes with 10 questions each
-- Each quiz mapped to its course: React, Node.js, MongoDB, UI/UX, DevOps, TypeScript
-- Questions cover core concepts from each course
-- Passing score threshold of 70%
-
-### Bug Fixes & Improvements
-- Fixed `enrollment.progress` filtering errors in LessonViewerPage and CourseDetailPage
-- Added `Array.isArray()` safety checks throughout for enrollment progress data
-- Fixed NaN errors in ProgressRing component with null/undefined checks
-- Improved error handling with graceful fallbacks
-
-### UI/UX Enhancements
-- Enhanced CourseDetailPage with module expansion and lesson tracking
-- Improved LessonViewerPage with navigation and completion marking
-- Fixed import statements for proper component rendering
-- Added missing component variants (Button outline, Badge variants)
-
-## Known Issues & Limitations
-
-- Quiz attempts are limited by passing score mechanism
-- Certificate auto-generation on completion
-- Learner cannot create courses (trainer+ only)
-- No course scheduling/deadline features
-
-## Future Enhancements
-
-- Video upload instead of YouTube embedding
-- Peer review and feedback system
-- Discussion forums
-- Certificate sharing to LinkedIn
-- Mobile app
-- Real-time notifications
-- Advanced analytics with skill tracking
+MIT License - see LICENSE file for details.

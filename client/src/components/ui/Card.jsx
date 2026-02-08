@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils';
 
 export default function Card({
@@ -5,6 +6,9 @@ export default function Card({
   className = '',
   padding = 'md',
   hover = false,
+  animate = false,
+  delay = 0,
+  variant = 'default',
   ...props
 }) {
   const paddings = {
@@ -14,40 +18,66 @@ export default function Card({
     lg: 'p-8',
   };
 
+  const cardVariants = {
+    default: 'bg-white border-stone-200/80',
+    glass: 'glass-card',
+    elevated: 'bg-white shadow-luxury border-transparent',
+    outline: 'bg-transparent border-stone-300 border-dashed',
+  };
+
+  const Component = hover || animate ? motion.div : 'div';
+
+  const motionProps = {
+    ...(hover && {
+      whileHover: {
+        y: -4,
+        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.1)',
+        transition: { type: 'spring', stiffness: 400, damping: 20 }
+      },
+    }),
+    ...(animate && {
+      initial: { opacity: 0, y: 20 },
+      animate: { opacity: 1, y: 0 },
+      transition: { duration: 0.4, delay, ease: [0.22, 1, 0.36, 1] },
+    }),
+  };
+
   return (
-    <div
+    <Component
+      {...motionProps}
       className={cn(
-        'bg-white rounded-xl shadow-sm border border-gray-100',
-        hover && 'hover:shadow-md transition-shadow duration-200',
+        'rounded-2xl border',
+        cardVariants[variant],
+        hover && 'cursor-pointer transition-shadow duration-300',
         paddings[padding],
         className
       )}
       {...props}
     >
       {children}
-    </div>
+    </Component>
   );
 }
 
 export function CardHeader({ children, className = '' }) {
   return (
-    <div className={cn('border-b border-gray-100 pb-4 mb-4', className)}>
+    <div className={cn('border-b border-stone-100 pb-4 mb-5', className)}>
       {children}
     </div>
   );
 }
 
-export function CardTitle({ children, className = '' }) {
+export function CardTitle({ children, className = '', as: Tag = 'h3' }) {
   return (
-    <h3 className={cn('text-lg font-semibold text-gray-900', className)}>
+    <Tag className={cn('text-lg font-bold text-stone-900 tracking-tight', className)}>
       {children}
-    </h3>
+    </Tag>
   );
 }
 
 export function CardDescription({ children, className = '' }) {
   return (
-    <p className={cn('text-sm text-gray-500 mt-1', className)}>
+    <p className={cn('text-sm text-stone-500 mt-1.5 leading-relaxed', className)}>
       {children}
     </p>
   );
@@ -59,7 +89,7 @@ export function CardContent({ children, className = '' }) {
 
 export function CardFooter({ children, className = '' }) {
   return (
-    <div className={cn('border-t border-gray-100 pt-4 mt-4', className)}>
+    <div className={cn('border-t border-stone-100 pt-5 mt-5', className)}>
       {children}
     </div>
   );

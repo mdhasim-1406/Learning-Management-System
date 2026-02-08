@@ -1,13 +1,34 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { getMyCertificates } from '../api';
-import { AppLayout, PageHeader } from '../components/layout';
-import { Card, Badge, Button, Skeleton } from '../components/ui';
+import AppLayout from '../components/layout/AppLayout';
+import PageHeader from '../components/layout/PageHeader';
+import Button from '../components/ui-next/Button';
+import Card, { CardContent } from '../components/ui-next/Card';
+import Skeleton from '../components/ui-next/Skeleton';
 import { formatDate } from '../lib/utils';
+import { motion } from 'framer-motion';
+import { pageVariants, staggerContainer, fadeInUp } from '../lib/animations';
+
+function DownloadIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+    </svg>
+  );
+}
+
+function AwardIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z" />
+    </svg>
+  );
+}
 
 const CertificatesPage = () => {
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCert, setSelectedCert] = useState(null);
 
   useEffect(() => {
     const fetchCertificates = async () => {
@@ -23,12 +44,17 @@ const CertificatesPage = () => {
     fetchCertificates();
   }, []);
 
+  const handleDownload = (cert) => {
+    // In a real app, this would generate a PDF
+    alert(`Downloading certificate: ${cert.certificateNumber}`);
+  };
+
   if (loading) {
     return (
       <AppLayout>
-        <PageHeader title="My Certificates" description="View your earned certificates" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-64" />)}
+        <PageHeader title="My Certificates" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[1, 2].map(i => <Skeleton key={i} className="h-64 rounded-xl" />)}
         </div>
       </AppLayout>
     );
@@ -36,151 +62,69 @@ const CertificatesPage = () => {
 
   return (
     <AppLayout>
-      <PageHeader
-        title="My Certificates"
-        description={`${certificates.length} certificates earned`}
-      />
+      <motion.div
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="space-y-6"
+      >
+        <PageHeader title="My Certificates" description="View and download your earned certificates" />
 
-      {certificates.length === 0 ? (
-        <Card className="text-center py-16">
-          <div className="text-6xl mb-4">🏆</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No certificates yet</h3>
-          <p className="text-gray-500 mb-4">Complete courses to earn certificates</p>
-          <a href="/courses" className="text-indigo-600 hover:text-indigo-700">
-            Browse courses →
-          </a>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {certificates.map(cert => (
-            <CertificateCard
-              key={cert._id}
-              certificate={cert}
-              onView={() => setSelectedCert(cert)}
-            />
-          ))}
-        </div>
-      )}
+        {certificates.length === 0 ? (
+          <Card className="text-center py-12 border-stone-200">
+            <AwardIcon className="w-16 h-16 text-stone-300 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-stone-900 mb-2">No certificates yet</h3>
+            <p className="text-stone-500 mb-6">Complete courses to earn certificates.</p>
+            <Link to="/courses">
+              <Button variant="luxury">Browse Courses</Button>
+            </Link>
+          </Card>
+        ) : (
+          <motion.div
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {certificates.map((cert) => (
+              <motion.div key={cert._id} variants={fadeInUp}>
+                <Card className="h-full border-stone-200 hover:border-emerald-200 transition-colors group">
+                  <CardContent className="p-6 flex flex-col h-full">
+                    <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                      <AwardIcon className="w-6 h-6 text-emerald-600" />
+                    </div>
 
-      {/* Certificate Modal */}
-      {selectedCert && (
-        <CertificateModal
-          certificate={selectedCert}
-          onClose={() => setSelectedCert(null)}
-        />
-      )}
-    </AppLayout>
+                    <h3 className="font-bold text-stone-900 mb-1 line-clamp-1">
+                      {cert.course?.title}
+                    </h3>
+                    <p className="text-sm text-stone-500 mb-4">
+                      Issued on {formatDate(cert.issuedAt)}
+                    </p>
+
+                    <div className="mt-auto pt-4 border-t border-stone-100 flex items-center justify-between">
+                      <span className="text-xs font-mono text-stone-400">
+                        #{cert.certificateNumber.slice(-8).toUpperCase()}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDownload(cert)}
+                        className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                      >
+                        <DownloadIcon className="w-4 h-4 mr-1.5" />
+                        Download
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </motion.div>
+    </AppLayout >
   );
 };
-
-function CertificateCard({ certificate, onView }) {
-  return (
-    <Card padding="none" hover className="overflow-hidden">
-      {/* Certificate Preview */}
-      <div className="relative bg-gradient-to-br from-indigo-600 to-purple-700 p-6 text-white">
-        <div className="absolute top-3 right-3">
-          <Badge variant="success" size="sm">Verified</Badge>
-        </div>
-        <div className="text-center py-6">
-          <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <AwardIcon className="w-6 h-6 text-white" />
-          </div>
-          <p className="text-xs text-indigo-200 uppercase tracking-wide">Certificate of Completion</p>
-          <h3 className="text-lg font-bold mt-2 line-clamp-2">{certificate.course?.title}</h3>
-        </div>
-      </div>
-      
-      {/* Details */}
-      <div className="p-4">
-        <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-          <span>Issued: {formatDate(certificate.issuedAt)}</span>
-          <span className="font-mono text-xs">{certificate.certificateNumber}</span>
-        </div>
-        <Button onClick={onView} variant="secondary" className="w-full" size="sm">
-          View Certificate
-        </Button>
-      </div>
-    </Card>
-  );
-}
-
-function CertificateModal({ certificate, onClose }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden">
-        {/* Header */}
-        <div className="absolute top-4 right-4 z-10">
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <CloseIcon className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Certificate Content */}
-        <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-700 p-8 text-white text-center">
-          <div className="border-4 border-white/30 rounded-xl p-8">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AwardIcon className="w-8 h-8" />
-            </div>
-            <p className="text-sm uppercase tracking-widest text-indigo-200">Certificate of Completion</p>
-            <h1 className="text-2xl font-bold mt-4 mb-2">This is to certify that</h1>
-            <p className="text-3xl font-bold text-yellow-300">You</p>
-            <p className="text-xl mt-4">have successfully completed</p>
-            <h2 className="text-2xl font-bold mt-2 mb-4">{certificate.course?.title}</h2>
-            <div className="mt-6 pt-6 border-t border-white/30">
-              <p className="text-sm text-indigo-200">Issued on {formatDate(certificate.issuedAt)}</p>
-              <p className="font-mono text-xs mt-2 text-indigo-300">Certificate ID: {certificate.certificateNumber}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="p-4 bg-gray-50 flex justify-center gap-3">
-          <Button variant="secondary" size="sm">
-            <DownloadIcon className="w-4 h-4 mr-2" />
-            Download PDF
-          </Button>
-          <Button variant="secondary" size="sm">
-            <ShareIcon className="w-4 h-4 mr-2" />
-            Share
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Icons
-function AwardIcon({ className }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-    </svg>
-  );
-}
-
-function CloseIcon({ className }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  );
-}
-
-function DownloadIcon({ className }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-    </svg>
-  );
-}
-
-function ShareIcon({ className }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-    </svg>
-  );
-}
 
 export default CertificatesPage;

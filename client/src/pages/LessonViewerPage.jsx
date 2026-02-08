@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getCourse, getEnrollments, updateProgress } from '../api';
-import Button from '../components/ui/Button';
-import Card, { CardContent } from '../components/ui/Card';
-import Badge from '../components/ui/Badge';
-import Skeleton from '../components/ui/Skeleton';
+import Button from '../components/ui-next/Button';
+import Card, { CardContent } from '../components/ui-next/Card';
+import Badge from '../components/ui-next/Badge';
+import Skeleton from '../components/ui-next/Skeleton';
 import { cn } from '../lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { pageVariants, fadeInUp } from '../lib/animations';
 
 // Icons
 function ChevronLeftIcon({ className }) {
@@ -60,7 +62,7 @@ function LinkIcon({ className }) {
 function AwardIcon({ className }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z" />
     </svg>
   );
 }
@@ -141,7 +143,7 @@ const LessonViewerPage = () => {
   const navigateLesson = (direction) => {
     const currentModule = course?.modules?.[currentModuleIndex];
     if (!currentModule || !course?.modules) return;
-    
+
     if (direction === 'next') {
       if (currentLessonIndex < (currentModule.lessons?.length || 0) - 1) {
         setCurrentLessonIndex(currentLessonIndex + 1);
@@ -196,49 +198,53 @@ const LessonViewerPage = () => {
 
     switch (lesson.type) {
       case 'video':
-        const videoId = lesson.content?.includes('youtube')
-          ? lesson.content.split('v=')[1]?.split('&')[0] ||
-            lesson.content.split('/').pop()
-          : null;
-        
-        if (videoId) {
-          return (
-            <div className="aspect-video rounded-xl overflow-hidden bg-black">
+        return (
+          <div className="space-y-4">
+            <div className="relative aspect-video rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-orange-900 to-amber-900">
               <iframe
-                className="w-full h-full"
-                src={`https://www.youtube.com/embed/${videoId}`}
+                className="absolute inset-0 w-full h-full"
+                src={lesson.content}
+                title={lesson.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
             </div>
-          );
-        }
-        return (
-          <div className="aspect-video rounded-xl overflow-hidden bg-black">
-            <video className="w-full h-full" controls src={lesson.content} />
+            <Card className="bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200">
+              <CardContent className="flex items-center gap-4 py-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-amber-400 flex items-center justify-center flex-shrink-0">
+                  <PlayIcon className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-orange-800">Watch Completely to Mark as Done</p>
+                  <p className="text-xs text-orange-600">Finish watching the entire video, then click "Mark as Complete" to track your progress.</p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         );
 
       case 'pdf':
         return (
-          <div className="rounded-xl overflow-hidden border">
+          <div className="rounded-xl overflow-hidden border border-stone-200 shadow-sm">
             <iframe className="w-full h-[600px]" src={lesson.content} />
           </div>
         );
 
       case 'link':
         return (
-          <Card className="text-center py-16">
+          <Card className="text-center py-16 border-stone-200">
             <CardContent>
-              <LinkIcon className="w-16 h-16 text-indigo-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">External Resource</h3>
-              <p className="text-gray-500 mb-6">This lesson contains an external resource</p>
+              <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <LinkIcon className="w-10 h-10 text-amber-500" />
+              </div>
+              <h3 className="text-xl font-bold text-stone-900 mb-2">External Resource</h3>
+              <p className="text-stone-500 mb-6">This lesson contains an external link</p>
               <a
                 href={lesson.content}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Button>
+                <Button className="bg-amber-500 hover:bg-amber-600">
                   Open External Link
                   <ChevronRightIcon className="w-4 h-4 ml-2" />
                 </Button>
@@ -251,8 +257,8 @@ const LessonViewerPage = () => {
         return (
           <Card className="text-center py-16">
             <CardContent>
-              <DocumentIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">Unsupported content type</p>
+              <DocumentIcon className="w-16 h-16 text-stone-300 mx-auto mb-4" />
+              <p className="text-stone-500">Unsupported content type</p>
             </CardContent>
           </Card>
         );
@@ -261,8 +267,8 @@ const LessonViewerPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
-        <div className="w-80 bg-white border-r p-4 hidden lg:block">
+      <div className="min-h-screen bg-stone-50 flex">
+        <div className="w-80 bg-white border-r border-stone-100 p-4 hidden lg:block">
           <Skeleton className="h-6 w-32 mb-6" />
           <Skeleton className="h-4 w-full mb-2" />
           <Skeleton className="h-2 w-full mb-6" />
@@ -288,15 +294,15 @@ const LessonViewerPage = () => {
 
   if (!course || !enrollment) return null;
 
-  // Safety check: if course has no modules or lessons, show appropriate message
+  // Safety check for empty course
   if (!course.modules || course.modules.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
         <Card className="text-center p-8">
           <CardContent>
-            <DocumentIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">No Content Available</h2>
-            <p className="text-gray-500 mb-4">This course doesn't have any lessons yet.</p>
+            <DocumentIcon className="w-16 h-16 text-stone-300 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-stone-900 mb-2">No Content Available</h2>
+            <p className="text-stone-500 mb-4">This course doesn't have any lessons yet.</p>
             <Link to={`/courses/${id}`}>
               <Button variant="outline">Back to Course</Button>
             </Link>
@@ -309,15 +315,15 @@ const LessonViewerPage = () => {
   const currentModule = course.modules[currentModuleIndex];
   const currentLesson = currentModule?.lessons?.[currentLessonIndex];
 
-  // Safety check for currentModule and currentLesson
+  // Safety check for current selection
   if (!currentModule || !currentLesson) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
         <Card className="text-center p-8">
           <CardContent>
-            <DocumentIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Lesson Not Found</h2>
-            <p className="text-gray-500 mb-4">Unable to load the lesson content.</p>
+            <DocumentIcon className="w-16 h-16 text-stone-300 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-stone-900 mb-2">Lesson Not Found</h2>
+            <p className="text-stone-500 mb-4">Unable to load the lesson content.</p>
             <Link to={`/courses/${id}`}>
               <Button variant="outline">Back to Course</Button>
             </Link>
@@ -337,7 +343,7 @@ const LessonViewerPage = () => {
   const LessonIcon = getLessonIcon(currentLesson?.type);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-stone-50 flex font-sans">
       {/* Overlay for mobile */}
       {sidebarOpen && (
         <div
@@ -349,57 +355,59 @@ const LessonViewerPage = () => {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-80 bg-white border-r transform transition-transform lg:relative lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 w-80 bg-white border-r border-stone-200 transform transition-transform lg:relative lg:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-4 border-b">
+          <div className="p-5 border-b border-stone-100 bg-stone-50/50">
             <div className="flex items-center justify-between mb-4">
               <Link
                 to={`/courses/${id}`}
-                className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                className="text-sm text-emerald-600 hover:text-emerald-800 flex items-center gap-1 font-medium transition-colors"
               >
                 <ChevronLeftIcon className="w-4 h-4" />
                 Back to Course
               </Link>
               <button
-                className="lg:hidden text-gray-500 hover:text-gray-700"
+                className="lg:hidden text-stone-500 hover:text-stone-700"
                 onClick={() => setSidebarOpen(false)}
               >
                 <XIcon className="w-5 h-5" />
               </button>
             </div>
-            <h2 className="font-semibold text-gray-900 truncate">{course.title}</h2>
-            <div className="mt-3">
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600">Progress</span>
-                <span className="font-medium text-gray-900">{completedLessons}/{totalLessons}</span>
+            <h2 className="font-bold text-stone-900 truncate text-lg">{course.title}</h2>
+            <div className="mt-4">
+              <div className="flex justify-between text-xs mb-1.5 uppercase tracking-wide font-semibold text-stone-500">
+                <span>Progress</span>
+                <span>{completedLessons}/{totalLessons}</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
+              <div className="w-full bg-stone-200 rounded-full h-1.5">
+                <motion.div
+                  className="bg-emerald-500 h-1.5 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.5 }}
                 />
               </div>
             </div>
           </div>
 
           {/* Module list */}
-          <nav className="flex-1 overflow-y-auto p-4">
-            <div className="space-y-4">
+          <nav className="flex-1 overflow-y-auto p-4 space-y-6">
+            <div className="space-y-6">
               {course.modules.map((module, mIdx) => (
                 <div key={module._id || mIdx}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-medium">
+                  <div className="flex items-center gap-2 mb-3 px-2">
+                    <span className="w-6 h-6 rounded-md bg-stone-100 text-stone-600 flex items-center justify-center text-xs font-bold">
                       {mIdx + 1}
                     </span>
-                    <span className="text-sm font-medium text-gray-900 truncate">
+                    <span className="text-xs font-bold text-stone-500 uppercase tracking-wider truncate">
                       {module.title}
                     </span>
                   </div>
-                  <div className="ml-3 border-l-2 border-gray-100 pl-4 space-y-1">
+                  <div className="pl-2 space-y-1">
                     {(module.lessons || []).map((lesson, lIdx) => {
                       const isActive = mIdx === currentModuleIndex && lIdx === currentLessonIndex;
                       const completed = isLessonCompleted(lesson._id);
@@ -414,16 +422,16 @@ const LessonViewerPage = () => {
                             setSidebarOpen(false);
                           }}
                           className={cn(
-                            'w-full text-left text-sm px-3 py-2 rounded-lg flex items-center gap-2 transition-colors',
+                            'w-full text-left text-sm px-3 py-2.5 rounded-lg flex items-center gap-2.5 transition-all duration-200 border border-transparent',
                             isActive
-                              ? 'bg-indigo-50 text-indigo-700'
-                              : 'text-gray-600 hover:bg-gray-100'
+                              ? 'bg-emerald-50 text-emerald-800 font-medium border-emerald-100 shadow-sm'
+                              : 'text-stone-600 hover:bg-stone-100'
                           )}
                         >
                           {completed ? (
-                            <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0" />
+                            <CheckCircleIcon className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                           ) : (
-                            <LIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                            <LIcon className={cn("w-4 h-4 flex-shrink-0", isActive ? "text-emerald-500" : "text-stone-400")} />
                           )}
                           <span className="truncate">{lesson.title}</span>
                         </button>
@@ -437,9 +445,9 @@ const LessonViewerPage = () => {
 
           {/* Quiz button */}
           {progress === 100 && (
-            <div className="p-4 border-t bg-green-50">
+            <div className="p-4 border-t border-stone-100 bg-emerald-50/50">
               <Link to={`/courses/${id}/quiz`}>
-                <Button className="w-full bg-green-600 hover:bg-green-700">
+                <Button className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-md hover:shadow-lg transition-all">
                   <AwardIcon className="w-4 h-4 mr-2" />
                   Take Final Quiz
                 </Button>
@@ -450,25 +458,25 @@ const LessonViewerPage = () => {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col min-h-screen">
+      <main className="flex-1 flex flex-col min-h-screen w-full">
         {/* Top bar */}
-        <header className="bg-white border-b px-4 py-3 flex items-center gap-4 lg:px-6">
+        <header className="bg-white border-b border-stone-200 px-4 py-3 flex items-center gap-4 lg:px-6 sticky top-0 z-30 shadow-sm">
           <button
-            className="lg:hidden text-gray-500 hover:text-gray-700"
+            className="lg:hidden text-stone-500 hover:text-stone-700"
             onClick={() => setSidebarOpen(true)}
           >
             <MenuIcon className="w-6 h-6" />
           </button>
-          <div className="flex-1 flex items-center gap-3">
-            <Badge variant="outline" className="capitalize">
+          <div className="flex-1 flex items-center gap-3 overflow-hidden">
+            <Badge variant="outline" className="capitalize bg-stone-50 hidden sm:inline-flex">
               {currentLesson?.type}
             </Badge>
-            <h1 className="text-lg font-semibold text-gray-900 truncate">
+            <h1 className="text-lg font-bold text-stone-900 truncate">
               {currentLesson?.title}
             </h1>
           </div>
           {isLessonCompleted(currentLesson?._id) && (
-            <Badge variant="success">
+            <Badge variant="success" className="animate-pulse-soft">
               <CheckCircleIcon className="w-3 h-3 mr-1" />
               Completed
             </Badge>
@@ -476,19 +484,26 @@ const LessonViewerPage = () => {
         </header>
 
         {/* Content area */}
-        <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
-          <div className="max-w-4xl mx-auto">
+        <div className="flex-1 p-4 lg:p-8 overflow-y-auto bg-stone-50">
+          <motion.div
+            key={`${currentModuleIndex}-${currentLessonIndex}`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="max-w-4xl mx-auto"
+          >
             {renderContent(currentLesson)}
-          </div>
+          </motion.div>
         </div>
 
         {/* Bottom navigation */}
-        <footer className="bg-white border-t px-4 py-4 lg:px-6">
+        <footer className="bg-white border-t border-stone-200 px-4 py-4 lg:px-6 z-30">
           <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
             <Button
               variant="outline"
               onClick={() => navigateLesson('prev')}
               disabled={!hasPrev}
+              className="border-stone-200 hover:bg-stone-50 text-stone-600"
             >
               <ChevronLeftIcon className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Previous</span>
@@ -498,18 +513,27 @@ const LessonViewerPage = () => {
               onClick={handleMarkComplete}
               disabled={marking || isLessonCompleted(currentLesson?._id)}
               className={cn(
-                isLessonCompleted(currentLesson?._id) && 'bg-green-600 hover:bg-green-600'
+                "transition-all duration-300 min-w-[180px] rounded-full px-8 py-3 font-semibold text-white",
+                isLessonCompleted(currentLesson?._id)
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30 cursor-default'
+                  : 'bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 hover:scale-105 active:scale-95'
               )}
             >
               {isLessonCompleted(currentLesson?._id) ? (
                 <>
-                  <CheckCircleIcon className="w-4 h-4 mr-2" />
+                  <CheckCircleIcon className="w-5 h-5 mr-2" />
                   Completed
                 </>
               ) : marking ? (
-                'Marking...'
+                <div className="flex items-center">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                  Marking...
+                </div>
               ) : (
-                'Mark as Complete'
+                <>
+                  Mark as Complete
+                  <CheckCircleIcon className="w-5 h-5 ml-2 opacity-70" />
+                </>
               )}
             </Button>
 
@@ -517,6 +541,7 @@ const LessonViewerPage = () => {
               variant="outline"
               onClick={() => navigateLesson('next')}
               disabled={!hasNext}
+              className="border-stone-200 hover:bg-stone-50 text-stone-600"
             >
               <span className="hidden sm:inline">Next</span>
               <ChevronRightIcon className="w-4 h-4 ml-2" />

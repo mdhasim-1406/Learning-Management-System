@@ -2,9 +2,50 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getCourses, deleteCourse } from '../api';
 import { useAuth } from '../context/AuthContext';
-import Navbar from '../components/Navbar';
-import LoadingSpinner from '../components/LoadingSpinner';
-import EmptyState from '../components/EmptyState';
+import AppLayout from '../components/layout/AppLayout';
+import PageHeader from '../components/layout/PageHeader';
+import Button from '../components/ui-next/Button';
+import Badge from '../components/ui-next/Badge';
+import Card, { CardContent } from '../components/ui-next/Card';
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '../components/ui-next/Table';
+import Modal from '../components/ui-next/Modal';
+import Skeleton from '../components/ui-next/Skeleton';
+import { cn, formatDate } from '../lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { pageVariants, fadeInUp } from '../lib/animations';
+
+// Icons
+function PlusIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+    </svg>
+  );
+}
+
+function PencilIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+    </svg>
+  );
+}
+
+function TrashIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg>
+  );
+}
+
+function BookOpenIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+    </svg>
+  );
+}
 
 const AdminCoursesPage = () => {
   const { user } = useAuth();
@@ -41,80 +82,111 @@ const AdminCoursesPage = () => {
     }
   };
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) {
+    return (
+      <AppLayout>
+        <PageHeader title="Manage Courses" />
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-20 rounded-xl" />
+          ))}
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Navbar />
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Manage Courses</h1>
-          <Link
-            to="/admin/courses/new"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-          >
-            Create Course
-          </Link>
-        </div>
+    <AppLayout>
+      <motion.div
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="space-y-6"
+      >
+        <PageHeader
+          title="Manage Courses"
+          subtitle={user.role === 'trainer' ? 'Manage your created courses' : 'Manage all courses in the system'}
+          actions={
+            <Link to="/admin/courses/new">
+              <Button className="bg-emerald-600 hover:bg-emerald-700">
+                <PlusIcon className="w-4 h-4 mr-2" />
+                Create Course
+              </Button>
+            </Link>
+          }
+        />
 
         {courses.length === 0 ? (
-          <EmptyState message="No courses yet. Create your first course!" icon="📚" />
+          <Card className="text-center py-16 border-stone-200">
+            <BookOpenIcon className="w-16 h-16 text-stone-300 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-stone-900 mb-2">No courses yet</h3>
+            <p className="text-stone-500 mb-6">Create your first course to get started.</p>
+            <Link to="/admin/courses/new">
+              <Button variant="outline">Create Course</Button>
+            </Link>
+          </Card>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Modules</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created By</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+          <Card className="border-stone-200 overflow-hidden" padding="none">
+            <Table aria-label="Courses table">
+              <TableHeader>
+                <TableColumn>TITLE</TableColumn>
+                <TableColumn>STATUS</TableColumn>
+                <TableColumn>MODULES</TableColumn>
+                <TableColumn>CREATED BY</TableColumn>
+                <TableColumn align="end">ACTIONS</TableColumn>
+              </TableHeader>
+              <TableBody>
                 {courses.map((course) => (
-                  <tr key={course._id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{course.title}</div>
-                      <div className="text-sm text-gray-500 truncate max-w-xs">{course.description}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded ${
-                        course.status === 'published' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
+                  <TableRow key={course._id} className="hover:bg-stone-50 transition-colors">
+                    <TableCell>
+                      <div className="text-sm font-bold text-stone-900">{course.title}</div>
+                      <div className="text-sm text-stone-500 truncate max-w-xs">{course.description}</div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={course.status === 'published' ? 'success' : 'warning'}
+                        className="capitalize"
+                      >
                         {course.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {course.modules?.length || 0}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {course.createdBy?.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                      <Link
-                        to={`/admin/courses/${course._id}/edit`}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(course._id)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-stone-600 font-medium">{course.modules?.length || 0} modules</span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-stone-200 flex items-center justify-center text-xs font-bold text-stone-600">
+                          {course.createdBy?.name?.charAt(0)}
+                        </div>
+                        <span className="text-sm text-stone-600">{course.createdBy?.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-end gap-2">
+                        <Link to={`/admin/courses/${course._id}/edit`}>
+                          <Button variant="ghost" size="sm" className="hover:bg-emerald-50 hover:text-emerald-700">
+                            <PencilIcon className="w-4 h-4" />
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(course._id)}
+                          className="hover:bg-red-50 hover:text-red-600"
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </Card>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </AppLayout>
   );
 };
 

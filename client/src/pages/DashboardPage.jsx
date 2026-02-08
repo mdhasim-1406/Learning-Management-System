@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getDashboardStats, getCourses, getMyEnrollments } from '../api';
 import { AppLayout, PageHeader } from '../components/layout';
-import { Card, Badge, ProgressRing, Skeleton, SkeletonCard } from '../components/ui';
+import { Card, Badge, ProgressRing, Skeleton, SkeletonCard } from '../components/ui-next';
 import { cn } from '../lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { pageVariants, staggerContainer, cardVariants, fadeIn } from '../lib/animations';
 
 const DashboardPage = () => {
   const { user } = useAuth();
@@ -51,144 +53,159 @@ const DashboardPage = () => {
 
   return (
     <AppLayout>
-      <PageHeader
-        title={getGreeting(user?.name)}
-        description={getRoleDescription(user?.role)}
-      />
+      <motion.div
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="space-y-8"
+      >
+        <PageHeader
+          title={getGreeting(user?.name)}
+          description={getRoleDescription(user?.role)}
+        />
 
-      {/* Stats Grid */}
-      <div className="mb-8">
-        {stats && (
-          <>
-            {(user?.role === 'admin' || user?.role === 'superadmin') && <AdminStats stats={stats} />}
-            {user?.role === 'trainer' && <TrainerStats stats={stats} />}
-            {user?.role === 'learner' && <LearnerStats stats={stats} />}
-          </>
-        )}
-      </div>
+        {/* Stats Grid */}
+        <motion.div variants={staggerContainer} className="mb-8">
+          {stats && (
+            <>
+              {(user?.role === 'admin' || user?.role === 'superadmin') && <AdminStats stats={stats} />}
+              {user?.role === 'trainer' && <TrainerStats stats={stats} />}
+              {user?.role === 'learner' && <LearnerStats stats={stats} />}
+            </>
+          )}
+        </motion.div>
 
-      {/* Continue Learning / Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {user?.role === 'learner' && enrollments.length > 0 && (
-            <Card padding="none">
-              <div className="p-6 border-b border-gray-100">
+        {/* Continue Learning / Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {user?.role === 'learner' && enrollments.length > 0 && (
+              <Card padding="none" animate delay={0.2}>
+                <div className="p-6 border-b border-stone-100">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-stone-900">Continue Learning</h2>
+                    <Link to="/my-enrollments" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+                      View all
+                    </Link>
+                  </div>
+                </div>
+                <div className="divide-y divide-stone-100">
+                  {enrollments.map((enrollment, index) => (
+                    <motion.div
+                      key={enrollment._id}
+                      variants={fadeIn}
+                      transition={{ delay: 0.1 * index }}
+                    >
+                      <Link
+                        to={`/courses/${enrollment.course._id}/learn`}
+                        className="flex items-center gap-4 p-4 hover:bg-stone-50 transition-colors group"
+                      >
+                        <div className="relative overflow-hidden rounded-lg w-16 h-16">
+                          <img
+                            src={enrollment.course.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=200&q=80'}
+                            alt={enrollment.course.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-stone-900 truncate group-hover:text-emerald-700 transition-colors">{enrollment.course.title}</h3>
+                          <p className="text-sm text-stone-500">
+                            {enrollment.completedLessons?.length || 0} / {countLessons(enrollment.course)} lessons
+                          </p>
+                        </div>
+                        <ProgressRing progress={enrollment.progress || 0} size="sm" color="emerald" />
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* Recommended Courses */}
+            <Card padding="none" animate delay={0.3}>
+              <div className="p-6 border-b border-stone-100">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">Continue Learning</h2>
-                  <Link to="/my-enrollments" className="text-sm text-indigo-600 hover:text-indigo-700">
-                    View all
+                  <h2 className="text-lg font-semibold text-stone-900">
+                    {user?.role === 'learner' ? 'Recommended for You' : 'Popular Courses'}
+                  </h2>
+                  <Link to="/courses" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+                    Browse catalog
                   </Link>
                 </div>
               </div>
-              <div className="divide-y divide-gray-100">
-                {enrollments.map((enrollment) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6">
+                {courses.filter(c => c.status === 'published').slice(0, 4).map((course) => (
                   <Link
-                    key={enrollment._id}
-                    to={`/courses/${enrollment.course._id}/learn`}
-                    className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors"
+                    key={course._id}
+                    to={`/courses/${course._id}`}
+                    className="group"
                   >
-                    <img
-                      src={enrollment.course.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=200&q=80'}
-                      alt={enrollment.course.title}
-                      className="w-16 h-16 rounded-lg object-cover"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-900 truncate">{enrollment.course.title}</h3>
-                      <p className="text-sm text-gray-500">
-                        {enrollment.completedLessons?.length || 0} / {countLessons(enrollment.course)} lessons
-                      </p>
+                    <div className="relative overflow-hidden rounded-lg mb-3 shadow-sm border border-stone-200">
+                      <img
+                        src={course.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&q=80'}
+                        alt={course.title}
+                        className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute top-2 left-2">
+                        <Badge variant={course.level === 'Beginner' ? 'success' : course.level === 'Intermediate' ? 'warning' : 'danger'} size="sm">
+                          {course.level || 'Beginner'}
+                        </Badge>
+                      </div>
                     </div>
-                    <ProgressRing progress={enrollment.progress || 0} size="sm" />
+                    <h3 className="font-medium text-stone-900 group-hover:text-emerald-600 transition-colors line-clamp-1">
+                      {course.title}
+                    </h3>
+                    <p className="text-sm text-stone-500 mt-1">{course.category || 'General'} • {course.duration || 'Self-paced'}</p>
                   </Link>
                 ))}
               </div>
             </Card>
-          )}
+          </div>
 
-          {/* Recommended Courses */}
-          <Card padding="none">
-            <div className="p-6 border-b border-gray-100">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {user?.role === 'learner' ? 'Recommended for You' : 'Popular Courses'}
-                </h2>
-                <Link to="/courses" className="text-sm text-indigo-600 hover:text-indigo-700">
-                  Browse catalog
-                </Link>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6">
-              {courses.filter(c => c.status === 'published').slice(0, 4).map((course) => (
-                <Link
-                  key={course._id}
-                  to={`/courses/${course._id}`}
-                  className="group"
-                >
-                  <div className="relative overflow-hidden rounded-lg">
-                    <img
-                      src={course.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&q=80'}
-                      alt={course.title}
-                      className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-2 left-2">
-                      <Badge variant={course.level === 'Beginner' ? 'success' : course.level === 'Intermediate' ? 'warning' : 'danger'} size="sm">
-                        {course.level || 'Beginner'}
-                      </Badge>
+          {/* Sidebar */}
+          <motion.div variants={fadeIn} transition={{ delay: 0.4 }} className="space-y-6">
+            {/* Quick Actions */}
+            <Card>
+              <h3 className="font-semibold text-stone-900 mb-4">Quick Actions</h3>
+              <div className="space-y-2">
+                {getQuickActions(user?.role).map((action, i) => (
+                  <Link
+                    key={i}
+                    to={action.href}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-stone-50 transition-colors group border border-transparent hover:border-stone-100"
+                  >
+                    <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center transition-transform group-hover:scale-110 duration-300', action.color)}>
+                      <action.icon className="w-5 h-5" />
                     </div>
-                  </div>
-                  <h3 className="mt-2 font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">
-                    {course.title}
-                  </h3>
-                  <p className="text-sm text-gray-500">{course.category || 'General'} • {course.duration || 'Self-paced'}</p>
-                </Link>
-              ))}
-            </div>
-          </Card>
-        </div>
+                    <div>
+                      <p className="font-medium text-stone-900 group-hover:text-emerald-700 transition-colors">{action.title}</p>
+                      <p className="text-xs text-stone-500">{action.description}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </Card>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Quick Actions */}
-          <Card>
-            <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
-            <div className="space-y-2">
-              {getQuickActions(user?.role).map((action, i) => (
-                <Link
-                  key={i}
-                  to={action.href}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center', action.color)}>
-                    <action.icon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{action.title}</p>
-                    <p className="text-xs text-gray-500">{action.description}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </Card>
-
-          {/* Recent Activity placeholder */}
-          <Card>
-            <h3 className="font-semibold text-gray-900 mb-4">Need Help?</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Check our knowledge base for guides and tutorials.
-            </p>
-            <Link
-              to="/knowledge-base"
-              className="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-700"
-            >
-              Browse articles
-              <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </Card>
+            {/* Recent Activity placeholder */}
+            <Card>
+              <h3 className="font-semibold text-stone-900 mb-4">Need Help?</h3>
+              <p className="text-sm text-stone-500 mb-4">
+                Check our knowledge base for guides and tutorials.
+              </p>
+              <Link
+                to="/knowledge-base"
+                className="inline-flex items-center text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+              >
+                Browse articles
+                <svg className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </Card>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </AppLayout>
   );
 };
@@ -221,24 +238,24 @@ function countLessons(course) {
 function getQuickActions(role) {
   const actions = {
     learner: [
-      { title: 'Browse Courses', description: 'Find new courses', href: '/courses', color: 'bg-indigo-100 text-indigo-600', icon: BookIcon },
-      { title: 'My Certificates', description: 'View achievements', href: '/certificates', color: 'bg-yellow-100 text-yellow-600', icon: AwardIcon },
-      { title: 'Knowledge Base', description: 'Get help', href: '/knowledge-base', color: 'bg-green-100 text-green-600', icon: HelpIcon },
+      { title: 'Browse Courses', description: 'Find new courses', href: '/courses', color: 'bg-emerald-100 text-emerald-600', icon: BookIcon },
+      { title: 'My Certificates', description: 'View achievements', href: '/certificates', color: 'bg-amber-100 text-amber-600', icon: AwardIcon },
+      { title: 'Knowledge Base', description: 'Get help', href: '/knowledge-base', color: 'bg-teal-100 text-teal-600', icon: HelpIcon },
     ],
     trainer: [
-      { title: 'Create Course', description: 'Add new content', href: '/admin/courses/new', color: 'bg-indigo-100 text-indigo-600', icon: PlusIcon },
+      { title: 'Create Course', description: 'Add new content', href: '/admin/courses/new', color: 'bg-emerald-100 text-emerald-600', icon: PlusIcon },
       { title: 'My Courses', description: 'Manage courses', href: '/admin/courses', color: 'bg-teal-100 text-teal-600', icon: BookIcon },
-      { title: 'Browse Catalog', description: 'See all courses', href: '/courses', color: 'bg-gray-100 text-gray-600', icon: GridIcon },
+      { title: 'Browse Catalog', description: 'See all courses', href: '/courses', color: 'bg-stone-100 text-stone-600', icon: GridIcon },
     ],
     admin: [
-      { title: 'Manage Users', description: 'Add or edit users', href: '/admin/users', color: 'bg-indigo-100 text-indigo-600', icon: UsersIcon },
-      { title: 'View Reports', description: 'Analytics dashboard', href: '/admin/reports', color: 'bg-green-100 text-green-600', icon: ChartIcon },
-      { title: 'Manage Courses', description: 'All courses', href: '/admin/courses', color: 'bg-teal-100 text-teal-600', icon: BookIcon },
+      { title: 'Manage Users', description: 'Add or edit users', href: '/admin/users', color: 'bg-emerald-100 text-emerald-600', icon: UsersIcon },
+      { title: 'View Reports', description: 'Analytics dashboard', href: '/admin/reports', color: 'bg-teal-100 text-teal-600', icon: ChartIcon },
+      { title: 'Manage Courses', description: 'All courses', href: '/admin/courses', color: 'bg-amber-100 text-amber-600', icon: BookIcon },
     ],
     superadmin: [
-      { title: 'Manage Users', description: 'Add or edit users', href: '/admin/users', color: 'bg-indigo-100 text-indigo-600', icon: UsersIcon },
-      { title: 'View Reports', description: 'Analytics dashboard', href: '/admin/reports', color: 'bg-green-100 text-green-600', icon: ChartIcon },
-      { title: 'Manage Courses', description: 'All courses', href: '/admin/courses', color: 'bg-teal-100 text-teal-600', icon: BookIcon },
+      { title: 'Manage Users', description: 'Add or edit users', href: '/admin/users', color: 'bg-emerald-100 text-emerald-600', icon: UsersIcon },
+      { title: 'View Reports', description: 'Analytics dashboard', href: '/admin/reports', color: 'bg-teal-100 text-teal-600', icon: ChartIcon },
+      { title: 'Manage Courses', description: 'All courses', href: '/admin/courses', color: 'bg-amber-100 text-amber-600', icon: BookIcon },
     ],
   };
   return actions[role] || actions.learner;
@@ -248,10 +265,10 @@ function getQuickActions(role) {
 function AdminStats({ stats }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCard title="Total Users" value={stats.totalUsers} trend={`${stats.activeUsers} active`} icon={UsersIcon} color="bg-indigo-500" />
+      <StatCard title="Total Users" value={stats.totalUsers} trend={`${stats.activeUsers} active`} icon={UsersIcon} color="bg-emerald-500" />
       <StatCard title="Total Courses" value={stats.totalCourses} trend={`${stats.publishedCourses} published`} icon={BookIcon} color="bg-teal-500" />
-      <StatCard title="Enrollments" value={stats.totalEnrollments} trend={`${stats.completedEnrollments} completed`} icon={AcademicIcon} color="bg-purple-500" />
-      <StatCard title="Completion Rate" value={`${stats.completionRate}%`} isPercentage icon={ChartIcon} color="bg-green-500" />
+      <StatCard title="Enrollments" value={stats.totalEnrollments} trend={`${stats.completedEnrollments} completed`} icon={AcademicIcon} color="bg-amber-500" />
+      <StatCard title="Completion Rate" value={`${stats.completionRate}%`} isPercentage icon={ChartIcon} color="bg-rose-500" />
     </div>
   );
 }
@@ -259,10 +276,10 @@ function AdminStats({ stats }) {
 function TrainerStats({ stats }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCard title="My Courses" value={stats.myCourses} trend={`${stats.myPublishedCourses} published`} icon={BookIcon} color="bg-indigo-500" />
+      <StatCard title="My Courses" value={stats.myCourses} trend={`${stats.myPublishedCourses} published`} icon={BookIcon} color="bg-emerald-500" />
       <StatCard title="Enrollments" value={stats.enrollmentsInMyCourses} icon={UsersIcon} color="bg-teal-500" />
-      <StatCard title="Completed" value={stats.completedInMyCourses} icon={AcademicIcon} color="bg-purple-500" />
-      <StatCard title="Avg Completion" value={`${stats.avgCompletion}%`} isPercentage icon={ChartIcon} color="bg-green-500" />
+      <StatCard title="Completed" value={stats.completedInMyCourses} icon={AcademicIcon} color="bg-amber-500" />
+      <StatCard title="Avg Completion" value={`${stats.avgCompletion}%`} isPercentage icon={ChartIcon} color="bg-rose-500" />
     </div>
   );
 }
@@ -270,28 +287,30 @@ function TrainerStats({ stats }) {
 function LearnerStats({ stats }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCard title="Enrolled" value={stats.myEnrollments} icon={BookIcon} color="bg-indigo-500" />
-      <StatCard title="In Progress" value={stats.inProgressCourses} icon={PlayIcon} color="bg-yellow-500" />
-      <StatCard title="Completed" value={stats.completedCourses} icon={CheckIcon} color="bg-green-500" />
-      <StatCard title="Progress" value={`${stats.overallProgress}%`} isPercentage icon={ChartIcon} color="bg-purple-500" />
+      <StatCard title="Enrolled" value={stats.myEnrollments} icon={BookIcon} color="bg-emerald-500" />
+      <StatCard title="In Progress" value={stats.inProgressCourses} icon={PlayIcon} color="bg-amber-500" />
+      <StatCard title="Completed" value={stats.completedCourses} icon={CheckIcon} color="bg-teal-500" />
+      <StatCard title="Progress" value={`${stats.overallProgress}%`} isPercentage icon={ChartIcon} color="bg-rose-500" />
     </div>
   );
 }
 
 function StatCard({ title, value, trend, icon: Icon, color, isPercentage }) {
   return (
-    <Card className="relative overflow-hidden">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-gray-500">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
-          {trend && <p className="text-xs text-gray-500 mt-1">{trend}</p>}
+    <motion.div variants={cardVariants}>
+      <Card className="relative overflow-hidden h-full" hover>
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-sm text-stone-500 font-medium">{title}</p>
+            <p className="text-2xl font-bold text-stone-900 mt-1">{value}</p>
+            {trend && <p className="text-xs text-stone-500 mt-1">{trend}</p>}
+          </div>
+          <div className={cn('w-10 h-10 rounded-xl shadow-lg flex items-center justify-center text-white', color)}>
+            <Icon className="w-5 h-5" />
+          </div>
         </div>
-        <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center text-white', color)}>
-          <Icon className="w-5 h-5" />
-        </div>
-      </div>
-    </Card>
+      </Card>
+    </motion.div>
   );
 }
 

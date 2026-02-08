@@ -3,13 +3,15 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getCourse, getEnrollments, enroll } from '../api';
 import { useAuth } from '../context/AuthContext';
 import AppLayout from '../components/layout/AppLayout';
-import Button from '../components/ui/Button';
-import Badge from '../components/ui/Badge';
-import Card, { CardContent, CardHeader, CardTitle } from '../components/ui/Card';
-import Avatar from '../components/ui/Avatar';
-import ProgressRing from '../components/ui/ProgressRing';
-import Skeleton from '../components/ui/Skeleton';
+import Button from '../components/ui-next/Button';
+import Badge from '../components/ui-next/Badge';
+import Card, { CardContent, CardHeader, CardTitle } from '../components/ui-next/Card';
+import Avatar from '../components/ui-next/Avatar';
+import ProgressRing from '../components/ui-next/ProgressRing';
+import Skeleton from '../components/ui-next/Skeleton';
 import { cn, formatDuration } from '../lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { pageVariants, staggerContainer, fadeInUp, cardVariants } from '../lib/animations';
 
 // Icons
 function ClockIcon({ className }) {
@@ -71,12 +73,12 @@ const CourseDetailPage = () => {
           getEnrollments(),
         ]);
         setCourse(courseRes.data);
-        
+
         const userEnrollment = enrollmentsRes.data.find(
           (e) => e.course?._id === id
         );
         setEnrollment(userEnrollment);
-        
+
         // Expand all modules by default
         const expanded = {};
         courseRes.data.modules?.forEach((_, idx) => {
@@ -150,217 +152,260 @@ const CourseDetailPage = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
+      <motion.div
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="max-w-5xl mx-auto space-y-6"
+      >
         {/* Course Hero */}
-        <Card className="overflow-hidden">
-          <div className="relative">
-            {course.thumbnail ? (
-              <div className="h-48 bg-gradient-to-r from-indigo-600 to-purple-600 relative">
-                <img
-                  src={course.thumbnail}
-                  alt={course.title}
-                  className="absolute inset-0 w-full h-full object-cover opacity-30"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              </div>
-            ) : (
-              <div className="h-48 bg-gradient-to-r from-indigo-600 to-purple-600" />
-            )}
-            
-            <div className="absolute bottom-0 left-0 right-0 p-6">
-              <div className="flex items-end justify-between">
-                <div className="text-white">
-                  <div className="flex items-center gap-2 mb-2">
-                    {course.category && (
-                      <Badge variant="secondary" className="bg-white/20 text-white border-0">
-                        {course.category}
-                      </Badge>
-                    )}
-                    {course.level && (
-                      <Badge variant="outline" className="border-white/40 text-white">
-                        {course.level}
-                      </Badge>
-                    )}
-                  </div>
-                  <h1 className="text-3xl font-bold">{course.title}</h1>
+        <motion.div variants={cardVariants}>
+          <Card className="overflow-hidden border-stone-200">
+            <div className="relative">
+              {course.thumbnail ? (
+                <div className="h-48 bg-gradient-to-r from-emerald-600 to-teal-600 relative overflow-hidden">
+                  <img
+                    src={course.thumbnail}
+                    alt={course.title}
+                    className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 </div>
-                
-                {enrollment && (
-                  <ProgressRing progress={progress} size={80} strokeWidth={6}>
-                    <span className="text-lg font-bold text-indigo-600">{progress}%</span>
-                  </ProgressRing>
-                )}
-              </div>
-            </div>
-          </div>
-          
-          <CardContent className="pt-6">
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-              <div className="flex-1">
-                <p className="text-gray-600 mb-4">{course.description}</p>
-                
-                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                  <div className="flex items-center gap-2">
-                    <Avatar
-                      src={course.createdBy?.avatar}
-                      name={course.createdBy?.name}
-                      size="sm"
-                    />
-                    <span>{course.createdBy?.name}</span>
+              ) : (
+                <div className="h-48 bg-gradient-to-r from-emerald-600 to-teal-600" />
+              )}
+
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <div className="flex items-end justify-between">
+                  <div className="text-white relative z-10">
+                    <div className="flex items-center gap-2 mb-3">
+                      {course.category && (
+                        <Badge variant="secondary" className="bg-white/20 text-white border-0 backdrop-blur-md">
+                          {course.category}
+                        </Badge>
+                      )}
+                      {course.level && (
+                        <Badge variant="outline" className="border-white/40 text-white backdrop-blur-sm">
+                          {course.level}
+                        </Badge>
+                      )}
+                    </div>
+                    <motion.h1
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="text-3xl lg:text-4xl font-bold tracking-tight text-shadow-sm"
+                    >
+                      {course.title}
+                    </motion.h1>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <BookOpenIcon className="w-4 h-4" />
-                    <span>{course.modules?.length || 0} modules</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <PlayIcon className="w-4 h-4" />
-                    <span>{totalLessons} lessons</span>
-                  </div>
-                  {course.estimatedHours && (
-                    <div className="flex items-center gap-1">
-                      <ClockIcon className="w-4 h-4" />
-                      <span>{course.estimatedHours} hours</span>
+
+                  {enrollment && (
+                    <div className="hidden sm:block">
+                      <ProgressRing progress={progress} size={80} strokeWidth={6} trackColor="#d1fae5" progressColor="#10b981">
+                        <span className="text-lg font-bold text-emerald-400">{progress}%</span>
+                      </ProgressRing>
                     </div>
                   )}
                 </div>
               </div>
-              
-              <div className="lg:w-64 space-y-4">
-                {enrollment ? (
-                  <>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <div className="flex justify-between text-sm mb-2">
-                        <span className="text-gray-600">Progress</span>
-                        <span className="font-medium">{completedLessons} / {totalLessons} lessons</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
-                    </div>
-                    <Link to={`/courses/${id}/learn`} className="block">
-                      <Button className="w-full">
-                        <PlayIcon className="w-4 h-4 mr-2" />
-                        {progress > 0 ? 'Continue Learning' : 'Start Learning'}
-                      </Button>
-                    </Link>
-                  </>
-                ) : (
-                  <Button
-                    onClick={handleEnroll}
-                    disabled={enrolling}
-                    className="w-full"
-                    size="lg"
-                  >
-                    {enrolling ? 'Enrolling...' : 'Enroll Now'}
-                  </Button>
-                )}
-              </div>
             </div>
-          </CardContent>
-        </Card>
+
+            <CardContent className="pt-6">
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
+                <div className="flex-1 space-y-6">
+                  <p className="text-stone-600 text-lg leading-relaxed">{course.description}</p>
+
+                  <div className="flex flex-wrap items-center gap-6 text-sm text-stone-500 font-medium border-t border-stone-100 pt-6">
+                    <div className="flex items-center gap-2">
+                      <Avatar
+                        src={course.createdBy?.avatar}
+                        name={course.createdBy?.name}
+                        size="sm"
+                      />
+                      <span className="text-stone-700">{course.createdBy?.name}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <BookOpenIcon className="w-4 h-4 text-emerald-500" />
+                      <span>{course.modules?.length || 0} modules</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <PlayIcon className="w-4 h-4 text-teal-500" />
+                      <span>{totalLessons} lessons</span>
+                    </div>
+                    {course.estimatedHours && (
+                      <div className="flex items-center gap-1.5">
+                        <ClockIcon className="w-4 h-4 text-amber-500" />
+                        <span>{course.estimatedHours} hours</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="lg:w-72 space-y-4">
+                  {enrollment ? (
+                    <>
+                      <div className="bg-emerald-50 rounded-xl p-5 border border-emerald-100">
+                        <div className="flex justify-between text-sm mb-2 text-emerald-900 font-medium">
+                          <span>Progress</span>
+                          <span>{completedLessons} / {totalLessons} lessons</span>
+                        </div>
+                        <div className="w-full bg-emerald-200/50 rounded-full h-2.5 overflow-hidden">
+                          <motion.div
+                            className="bg-emerald-500 h-full rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progress}%` }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                          />
+                        </div>
+                      </div>
+                      <Link to={`/courses/${id}/learn`} className="block">
+                        <Button className="w-full py-6 text-lg shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all bg-emerald-600 hover:bg-emerald-700">
+                          <PlayIcon className="w-5 h-5 mr-2" />
+                          {progress > 0 ? 'Continue Learning' : 'Start Learning'}
+                        </Button>
+                      </Link>
+                    </>
+                  ) : (
+                    <Button
+                      onClick={handleEnroll}
+                      disabled={enrolling}
+                      className="w-full py-6 text-lg shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all bg-emerald-600 hover:bg-emerald-700"
+                      size="lg"
+                    >
+                      {enrolling ? 'Enrolling...' : 'Enroll Now'}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Course Content */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Course Content</CardTitle>
-            <p className="text-sm text-gray-500">
-              {course.modules?.length || 0} modules • {totalLessons} lessons
-            </p>
-          </CardHeader>
-          <CardContent>
-            {course.modules?.length === 0 ? (
-              <div className="text-center py-12">
-                <BookOpenIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">No content available yet.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {course.modules.map((module, moduleIndex) => {
-                  const moduleLessons = module.lessons || [];
-                  const progressArray = Array.isArray(enrollment?.progress) ? enrollment.progress : [];
-                  const completedInModule = progressArray.filter(
-                    (p) => moduleLessons.some((l) => l._id === p.lessonId) && p.completed
-                  ).length;
-                  
-                  return (
-                    <div key={module._id || moduleIndex} className="border rounded-lg overflow-hidden">
-                      <button
-                        onClick={() => toggleModule(moduleIndex)}
-                        className="w-full flex items-center justify-between bg-gray-50 px-4 py-3 hover:bg-gray-100 transition-colors"
+        <motion.div variants={staggerContainer} initial="initial" animate="animate">
+          <Card className="border-stone-200">
+            <CardHeader className="border-b border-stone-100 pb-4">
+              <CardTitle className="text-xl">Course Content</CardTitle>
+              <p className="text-sm text-stone-500">
+                {course.modules?.length || 0} modules • {totalLessons} lessons
+              </p>
+            </CardHeader>
+            <CardContent className="pt-6">
+              {course.modules?.length === 0 ? (
+                <div className="text-center py-12">
+                  <BookOpenIcon className="w-12 h-12 text-stone-300 mx-auto mb-4" />
+                  <p className="text-stone-500">No content available yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {course.modules.map((module, moduleIndex) => {
+                    const moduleLessons = module.lessons || [];
+                    const progressArray = Array.isArray(enrollment?.progress) ? enrollment.progress : [];
+                    const completedInModule = progressArray.filter(
+                      (p) => moduleLessons.some((l) => l._id === p.lessonId) && p.completed
+                    ).length;
+
+                    return (
+                      <motion.div
+                        variants={fadeInUp}
+                        key={module._id || moduleIndex}
+                        className="border border-stone-200 rounded-xl overflow-hidden hover:border-emerald-200 transition-colors"
                       >
-                        <div className="flex items-center gap-3">
-                          <span className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-medium">
-                            {moduleIndex + 1}
-                          </span>
-                          <div className="text-left">
-                            <h3 className="font-medium text-gray-900">{module.title}</h3>
-                            <p className="text-sm text-gray-500">
-                              {moduleLessons.length} lessons
-                              {enrollment && ` • ${completedInModule}/${moduleLessons.length} completed`}
-                            </p>
-                          </div>
-                        </div>
-                        <svg
-                          className={cn(
-                            'w-5 h-5 text-gray-400 transition-transform',
-                            expandedModules[moduleIndex] && 'rotate-180'
-                          )}
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
+                        <button
+                          onClick={() => toggleModule(moduleIndex)}
+                          className="w-full flex items-center justify-between bg-stone-50/50 px-5 py-4 hover:bg-stone-50 transition-colors"
                         >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                      
-                      {expandedModules[moduleIndex] && (
-                        <div className="divide-y">
-                          {moduleLessons.map((lesson, lessonIndex) => {
-                            const isCompleted = progressArray.some(
-                              (p) => p.lessonId === lesson._id && p.completed
-                            );
-                            const canAccess = enrollment;
-                            
-                            return (
-                              <div
-                                key={lesson._id || lessonIndex}
-                                className={cn(
-                                  'flex items-center justify-between px-4 py-3',
-                                  canAccess ? 'hover:bg-gray-50' : 'opacity-60'
-                                )}
-                              >
-                                <div className="flex items-center gap-3">
-                                  {isCompleted ? (
-                                    <CheckCircleIcon className="w-5 h-5 text-green-500" />
-                                  ) : canAccess ? (
-                                    <PlayIcon className="w-5 h-5 text-gray-400" />
-                                  ) : (
-                                    <LockIcon className="w-5 h-5 text-gray-400" />
-                                  )}
-                                  <div>
-                                    <p className="text-sm font-medium text-gray-900">{lesson.title}</p>
-                                    <p className="text-xs text-gray-500 capitalize">{lesson.type}</p>
-                                  </div>
-                                </div>
-                                {lesson.duration && (
-                                  <span className="text-xs text-gray-400">{lesson.duration} min</span>
-                                )}
+                          <div className="flex items-center gap-4">
+                            <span className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold shadow-sm">
+                              {moduleIndex + 1}
+                            </span>
+                            <div className="text-left">
+                              <h3 className="font-semibold text-stone-900 text-base">{module.title}</h3>
+                              <p className="text-xs text-stone-500 mt-0.5 font-medium">
+                                {moduleLessons.length} lessons
+                                {enrollment && ` • ${completedInModule}/${moduleLessons.length} completed`}
+                              </p>
+                            </div>
+                          </div>
+                          <motion.div
+                            animate={{ rotate: expandedModules[moduleIndex] ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <svg className="w-5 h-5 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </motion.div>
+                        </button>
+
+                        <AnimatePresence>
+                          {expandedModules[moduleIndex] && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3, ease: 'easeInOut' }}
+                              className="overflow-hidden"
+                            >
+                              <div className="divide-y divide-stone-100 border-t border-stone-100 bg-white">
+                                {moduleLessons.map((lesson, lessonIndex) => {
+                                  const isCompleted = progressArray.some(
+                                    (p) => p.lessonId === lesson._id && p.completed
+                                  );
+                                  const canAccess = enrollment;
+
+                                  return (
+                                    <div
+                                      key={lesson._id || lessonIndex}
+                                      className={cn(
+                                        'flex items-center justify-between px-5 py-3.5 transition-colors',
+                                        canAccess ? 'hover:bg-emerald-50/30' : 'opacity-60 bg-stone-50'
+                                      )}
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        {isCompleted ? (
+                                          <div className="text-emerald-500 bg-emerald-50 rounded-full p-1">
+                                            <CheckCircleIcon className="w-5 h-5" />
+                                          </div>
+                                        ) : canAccess ? (
+                                          <div className="text-stone-400 bg-stone-100 rounded-full p-1">
+                                            <PlayIcon className="w-5 h-5" />
+                                          </div>
+                                        ) : (
+                                          <div className="text-stone-300">
+                                            <LockIcon className="w-5 h-5" />
+                                          </div>
+                                        )}
+                                        <div>
+                                          <p className={cn(
+                                            "text-sm font-medium",
+                                            isCompleted ? "text-emerald-900" : "text-stone-700"
+                                          )}>
+                                            {lesson.title}
+                                          </p>
+                                          <p className="text-xs text-stone-500 capitalize">{lesson.type}</p>
+                                        </div>
+                                      </div>
+                                      {lesson.duration && (
+                                        <span className="text-xs text-stone-400 font-medium bg-stone-100 px-2 py-1 rounded-full">{lesson.duration} min</span>
+                                      )}
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
     </AppLayout>
   );
 };

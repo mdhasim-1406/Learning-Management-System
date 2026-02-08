@@ -1,13 +1,13 @@
 import { cn } from '../../lib/utils';
 
 const variants = {
-  default: 'bg-gray-100 text-gray-800',
-  primary: 'bg-indigo-100 text-indigo-800',
-  secondary: 'bg-gray-100 text-gray-600',
-  success: 'bg-green-100 text-green-800',
-  warning: 'bg-yellow-100 text-yellow-800',
+  default: 'bg-stone-100 text-stone-800',
+  primary: 'bg-emerald-100 text-emerald-800',
+  secondary: 'bg-stone-100 text-stone-600',
+  success: 'bg-emerald-100 text-emerald-800',
+  warning: 'bg-amber-100 text-amber-800',
   danger: 'bg-red-100 text-red-800',
-  info: 'bg-blue-100 text-blue-800',
+  info: 'bg-teal-100 text-teal-800',
   outline: 'bg-transparent border border-gray-300 text-gray-700',
 };
 
@@ -37,12 +37,12 @@ export default function Badge({
         <span
           className={cn(
             'w-1.5 h-1.5 rounded-full mr-1.5',
-            variant === 'success' && 'bg-green-500',
-            variant === 'warning' && 'bg-yellow-500',
+            variant === 'success' && 'bg-emerald-500',
+            variant === 'warning' && 'bg-amber-500',
             variant === 'danger' && 'bg-red-500',
-            variant === 'primary' && 'bg-indigo-500',
-            variant === 'info' && 'bg-blue-500',
-            variant === 'default' && 'bg-gray-500'
+            variant === 'primary' && 'bg-emerald-500',
+            variant === 'info' && 'bg-teal-500',
+            variant === 'default' && 'bg-stone-500'
           )}
         />
       )}
